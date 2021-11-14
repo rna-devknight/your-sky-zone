@@ -203,9 +203,21 @@ void uart_write_string(char *str)
 //     return stringFromUART;
 // }
 
+int validCharacter(char input)
+{
+    if (input >= 'a' && input <= 'z')
+        return 1;
+    else if (input >= 'A' && input <= 'Z')
+        return 1;
+    else if (input >= '0' && input <= '9')
+        return 1;
+    else
+        return 0;
+}
+
 void handleUARTstring(void)
 {
-    char finalString[16] = "";
+    char finalString[17] = "";
     char *temp;
 
     volatile char i, input;
@@ -230,7 +242,7 @@ void handleUARTstring(void)
                 input = uart_read_char();
 
                 // if valid character then add to string
-                if ((input >= 'a' && input <= 'z') || (input >= '0' && input <= '9'))
+                if (validCharacter(input))
                 {
                     temp = malloc(sizeof(char));
                     sprintf(temp, "%c", toupper(input));
