@@ -1,4 +1,3 @@
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -78,8 +77,11 @@ public class Finder extends JFrame {
 				String transponder = statesArr.getString(1);
 				String origin = statesArr.getString(2);
 
+				// System.out.println("callsign : " + transponder + " Origin: " + origin);
+				// ouputfile.println("callsign : " + transponder + " Origin: " + origin);
 				System.out.println("callsign : " + transponder + " Origin: " + origin);
-				ouputfile.println("callsign : " + transponder + " Origin: " + origin);
+				ouputfile.println(transponder);
+
 			}
 		}
 	}
