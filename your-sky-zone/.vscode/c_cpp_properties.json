@@ -1,0 +1,40 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/home/vinnieg/Documents/KnightHacks/your-sky-zone/your-sky-zone/include",
+                "/home/vinnieg/Documents/KnightHacks/your-sky-zone/your-sky-zone/src",
+                "/home/vinnieg/.platformio/packages/tool-unity",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/vinnieg/Documents/KnightHacks/your-sky-zone/your-sky-zone/include",
+                    "/home/vinnieg/Documents/KnightHacks/your-sky-zone/your-sky-zone/src",
+                    "/home/vinnieg/.platformio/packages/tool-unity",
+                    ""
+                ]
+            },
+            "defines": [
+                "F_CPU=8000000L",
+                "PLATFORMIO=50203",
+                "ENERGIA_ARCH_MSP430",
+                "ENERGIA_MSP_EXP430FR6989LP",
+                ""
+            ],
+            "compilerPath": "/home/vinnieg/.platformio/packages/toolchain-timsp430/bin/msp430-gcc",
+            "compilerArgs": [
+                "-mmcu=msp430fr6989",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
