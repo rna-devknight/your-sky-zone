@@ -47,8 +47,8 @@ volatile unsigned int seconds = 0;
 
 int main(void)
 {
-  WDTCTL = WDTPW | WDTHOLD; // Stop WDT
-  PM5CTL0 &= ~LOCKLPM5;     // Enable GPIO pins
+    WDTCTL = WDTPW | WDTHOLD; // Stop WDT
+    PM5CTL0 &= ~LOCKLPM5;     // Enable GPIO pins
 
     // set the pin directions to output
     P1DIR |= redLED;
@@ -57,10 +57,10 @@ int main(void)
     P1OUT &= ~redLED;
     P9OUT &= ~greenLED;
 
-  // Initializes the LCD_C module
-  Initialize_LCD();
+    // Initializes the LCD_C module
+    Initialize_LCD();
 
-  Initialize_UART();
+    Initialize_UART();
 
     char *finalString;
 
@@ -84,19 +84,19 @@ int main(void)
     // // Configure ACLK to the 32 KHz crystal
     // config_ACLK_to_32KHz_crystal();
 
-  // // Configure Channel 0 for up mode with interrupt
-  // TA0CCR0 = 32768 - 1;        // Fill to get 1 second @ 32 KHz
-  // // TA0CCTL0 |= CCIE;           // Enable Channel 0 CCIE bit
-  // // TA0CCTL0 &= ~CCIFG;         // Clear Channel 0 CCIFG bit
+    // // Configure Channel 0 for up mode with interrupt
+    // TA0CCR0 = 32768 - 1;        // Fill to get 1 second @ 32 KHz
+    // // TA0CCTL0 |= CCIE;           // Enable Channel 0 CCIE bit
+    // // TA0CCTL0 &= ~CCIFG;         // Clear Channel 0 CCIFG bit
 
-  // // Use ACLK, divide by 1, up mode, TAR cleared, enable interrupt for rollback-to-zero event
-  // TA0CTL = TASSEL_1 | ID_0 | MC_1 | TACLR;
+    // // Use ACLK, divide by 1, up mode, TAR cleared, enable interrupt for rollback-to-zero event
+    // TA0CTL = TASSEL_1 | ID_0 | MC_1 | TACLR;
 
-  // // Ensure the flag is cleared at the start
-  // TA0CTL &= ~TAIFG;
+    // // Ensure the flag is cleared at the start
+    // TA0CTL &= ~TAIFG;
 
-  // Enable the global interrupt bit (call an intrinsic function)
-  __enable_interrupt();
+    // Enable the global interrupt bit (call an intrinsic function)
+    __enable_interrupt();
 
     // char string[] = "HELLOMYDUDE";
 
@@ -104,29 +104,29 @@ int main(void)
         // display_string(string);
         display_string(finalString);
 
-  return 0;
+    return 0;
 }
 
 //**********************************
 // Configures ACLK to 32 KHz crystal
 void config_ACLK_to_32KHz_crystal(void)
 {
-  // By default, ACLK runs on LFMODCLK at 5MHz/128 = 39 KHz
+    // By default, ACLK runs on LFMODCLK at 5MHz/128 = 39 KHz
 
-  // Reroute pins to LFXIN/LFXOUT functionality
-  PJSEL1 &= ~BIT4;
-  PJSEL0 |= BIT4;
+    // Reroute pins to LFXIN/LFXOUT functionality
+    PJSEL1 &= ~BIT4;
+    PJSEL0 |= BIT4;
 
-  // Wait until the oscillator fault flags remain cleared
-  CSCTL0 = CSKEY; // Unlock CS registers
-  do
-  {
-    CSCTL5 &= ~LFXTOFFG; // Local fault flag
-    SFRIFG1 &= ~OFIFG;   // Global fault flag
-  } while ((CSCTL5 & LFXTOFFG) != 0);
+    // Wait until the oscillator fault flags remain cleared
+    CSCTL0 = CSKEY; // Unlock CS registers
+    do
+    {
+        CSCTL5 &= ~LFXTOFFG; // Local fault flag
+        SFRIFG1 &= ~OFIFG;   // Global fault flag
+    } while ((CSCTL5 & LFXTOFFG) != 0);
 
-  CSCTL0_H = 0; // Lock CS registers
-  return;
+    CSCTL0_H = 0; // Lock CS registers
+    return;
 }
 
 // Configure UART to the popular configuration
@@ -135,57 +135,55 @@ void config_ACLK_to_32KHz_crystal(void)
 // Initial clock: SMCLK @ 1.048 MHz with oversampling
 void Initialize_UART(void)
 {
-  // Divert pins to UART functionality
-  P3SEL1 &= ~(BIT4 | BIT5);
-  P3SEL0 |= (BIT4 | BIT5);
+    // Divert pins to UART functionality
+    P3SEL1 &= ~(BIT4 | BIT5);
+    P3SEL0 |= (BIT4 | BIT5);
 
-  // Use SMCLK clock; leave other settings default
-  UCA1CTLW0 |= UCSSEL_3;
+    // Use SMCLK clock; leave other settings default
+    UCA1CTLW0 |= UCSSEL_3;
 
-  // Configure the clock dividers and modulators
-  // UCBR=6, UCBRF=13, UCBRS=0x22, UCOS16=1 (oversampling)
-  UCA1BRW = 6;
-  UCA1MCTLW = UCBRS5 | UCBRS1 | UCBRF3 | UCBRF2 | UCBRF0 | UCOS16;
+    // Configure the clock dividers and modulators
+    // UCBR=6, UCBRF=13, UCBRS=0x22, UCOS16=1 (oversampling)
+    UCA1BRW = 6;
+    UCA1MCTLW = UCBRS5 | UCBRS1 | UCBRF3 | UCBRF2 | UCBRF0 | UCOS16;
 
-  // Exit the reset state (so transmission/reception can begin)
-  UCA1CTLW0 &= ~UCSWRST;
+    // Exit the reset state (so transmission/reception can begin)
+    UCA1CTLW0 &= ~UCSWRST;
 }
 
 void uart_write_char(unsigned char ch)
 {
-  // Wait for any ongoing transmission to complete
-  while ((FLAGS & TXFLAG) == 0)
-  {
-  }
+    // Wait for any ongoing transmission to complete
+    while ((FLAGS & TXFLAG) == 0) {}
 
-  // Write the byte to the transmit buffer
-  TXBUFFER = ch;
+    // Write the byte to the transmit buffer
+    TXBUFFER = ch;
 }
 
 // The function returns the byte; if none received, returns NULL
 unsigned char uart_read_char(void)
 {
-  unsigned char temp;
+    unsigned char temp;
 
-  // Return NULL if no byte received
-  if ((FLAGS & RXFLAG) == 0)
-    return '\0';
+    // Return NULL if no byte received
+    if ((FLAGS & RXFLAG) == 0)
+        return '\0';
 
-  // Otherwise, copy the received byte (clears the flag) and return it
-  temp = RXBUFFER;
+    // Otherwise, copy the received byte (clears the flag) and return it
+    temp = RXBUFFER;
 
-  return temp;
+    return temp;
 }
 
 // Function to transmit a string of any length
 void uart_write_string(char *str)
 {
-  volatile uint32_t i = 0, len = strlen(str);
+    volatile uint32_t i = 0, len = strlen(str);
 
-  for (i = 0; i < len; i++)
-    uart_write_char(str[i]);
+    for (i = 0; i < len; i++)
+        uart_write_char(str[i]);
 
-  return;
+    return;
 }
 
 // void uart_write_string(char * str)
@@ -199,50 +197,49 @@ void uart_write_string(char *str)
 
 char *takeUARTinput(void)
 {
-  volatile char i, in;
-  volatile unsigned int j;
+    volatile char i, in;
+    volatile unsigned int j;
 
-  // char debugString[] = "See here: ";
-  char *stringFromUART = "";
-  char chToStr[2];
+    // char debugString[] = "See here: ";
+    char *stringFromUART = "";
+    char chToStr[2];
 
-  // Initialize chToStr to end with a null terminating character
-  chToStr[1] = '\0';
+    // Initialize chToStr to end with a null terminating character
+    chToStr[1] = '\0';
 
-  for (i = '0'; i <= '7';)
-  {
-    P1OUT ^= redLED;
-    // uart_write_string("Begin Iteration ");
-    uart_write_char(i);
-    uart_write_string(": ");
-
-    for (j = 0; j < 50000; j++)
+    for (i = '0'; i <= '7';)
     {
+        P1OUT ^= redLED;
+        // uart_write_string("Begin Iteration ");
+        uart_write_char(i);
+        uart_write_string(": ");
 
-      in = toupper(uart_read_char());
+        for (j = 0; j < 50000; j++)
+        {
+            in = toupper(uart_read_char());
 
-      // If the input is a digit between 0 - 9 or A - Z
-      if ((in >= 48 && in <= 57) || (in >= 65 && in <= 90))
-      {
-        // P9OUT |= greenLED;
-        uart_write_char(in);
-        uart_write_string(" ");
-        chToStr[0] = in;
-        strcat(stringFromUART, chToStr);
-        i++;
-        break;
-      }
+            // If the input is a digit between 0 - 9 or A - Z
+            if ((in >= '0' && in <= '9') || (in >= 'A' && in <= 'Z'))
+            {
+                // P9OUT |= greenLED;
+                uart_write_char(in);
+                uart_write_string(" ");
+                chToStr[0] = in;
+                strcat(stringFromUART, chToStr);
+                i++;
+                break;
+            }
+        }
+
+        uart_write_string(stringFromUART);
+        uart_write_string("1234567");
+        // uart_write_string("End Iteration");
+        // uart_write_string(" ");
+        uart_write_char('\n');
+        uart_write_char('\r');
     }
 
-    uart_write_string(stringFromUART);
-    uart_write_string("1234567");
-    // uart_write_string("End Iteration");
-    // uart_write_string(" ");
-    uart_write_char('\n');
-    uart_write_char('\r');
-  }
-
-  return stringFromUART;
+    return stringFromUART;
 }
 
 //**********************************************************
@@ -262,8 +259,8 @@ void Initialize_LCD(void)
     CSCTL4 &= ~LFXTOFF;    // Enable LFXT
     do
     {
-      CSCTL5 &= ~LFXTOFFG; // Clear LFXT fault flag
-      SFRIFG1 &= ~OFIFG;
+        CSCTL5 &= ~LFXTOFFG; // Clear LFXT fault flag
+        SFRIFG1 &= ~OFIFG;
     } while (SFRIFG1 & OFIFG); // Test oscillator fault flag
     CSCTL0_H = 0;              // Lock CS registers
 
@@ -285,127 +282,127 @@ void Initialize_LCD(void)
     LCDCCTL0 |= LCDON;
 
     return;
-  }
+}
 
-  void display_uint16_LCD(unsigned int num)
-  {
+void display_uint16_LCD(unsigned int num)
+{
     // unsigned int n = num;
     int currDigit = 0, i = 0;
 
     do
     {
-      currDigit = num % 10;
-      display_digit(currDigit, i);
-      num /= 10;
-      i++;
+        currDigit = num % 10;
+        display_digit(currDigit, i);
+        num /= 10;
+        i++;
     } while (num > 0);
 
     return;
-  }
+}
 
-  void display_digit(int num, int digit)
-  {
+void display_digit(int num, int digit)
+{
     // LCDMx corresponding to each place (we want right justified)
     // LCDM10, LCDM6, LCDM4, LCDM19, LCDM15, LCDM8
     switch (digit)
     {
     case 0:
-      LCDM8 = LCD_Num[num];
-      break;
+        LCDM8 = LCD_Num[num];
+        break;
     case 1:
-      LCDM15 = LCD_Num[num];
-      break;
+        LCDM15 = LCD_Num[num];
+        break;
     case 2:
-      LCDM19 = LCD_Num[num];
-      break;
+        LCDM19 = LCD_Num[num];
+        break;
     case 3:
-      LCDM4 = LCD_Num[num];
-      break;
+        LCDM4 = LCD_Num[num];
+        break;
     case 4:
-      LCDM6 = LCD_Num[num];
-      break;
+        LCDM6 = LCD_Num[num];
+        break;
     case 5:
-      LCDM10 = LCD_Num[num];
-      break;
+        LCDM10 = LCD_Num[num];
+        break;
     default:
-      break;
+        break;
     }
 
     return;
-  }
+}
 
-  void display_char(char input, int digit)
-  {
+void display_char(char input, int digit)
+{
     if (input >= 'A' && input <= 'Z')
     {
-      int letterIndex = input - 'A';
-      switch (digit)
-      {
-      case 0:
-        LCDM8 = LCD_Alpha[letterIndex];
-        LCDM9 = LCD_Alpha2[letterIndex];
-        break;
-      case 1:
-        LCDM15 = LCD_Alpha[letterIndex];
-        LCDM16 = LCD_Alpha2[letterIndex];
-        break;
-      case 2:
-        LCDM19 = LCD_Alpha[letterIndex];
-        LCDM20 = LCD_Alpha2[letterIndex];
-        break;
-      case 3:
-        LCDM4 = LCD_Alpha[letterIndex];
-        LCDM5 = LCD_Alpha2[letterIndex];
-        break;
-      case 4:
-        LCDM6 = LCD_Alpha[letterIndex];
-        LCDM7 = LCD_Alpha2[letterIndex];
-        break;
-      case 5:
-        LCDM10 = LCD_Alpha[letterIndex];
-        LCDM11 = LCD_Alpha2[letterIndex];
-        break;
-      default:
-        break;
-      }
+        int letterIndex = input - 'A';
+        switch (digit)
+        {
+        case 0:
+            LCDM8 = LCD_Alpha[letterIndex];
+            LCDM9 = LCD_Alpha2[letterIndex];
+            break;
+        case 1:
+            LCDM15 = LCD_Alpha[letterIndex];
+            LCDM16 = LCD_Alpha2[letterIndex];
+            break;
+        case 2:
+            LCDM19 = LCD_Alpha[letterIndex];
+            LCDM20 = LCD_Alpha2[letterIndex];
+            break;
+        case 3:
+            LCDM4 = LCD_Alpha[letterIndex];
+            LCDM5 = LCD_Alpha2[letterIndex];
+            break;
+        case 4:
+            LCDM6 = LCD_Alpha[letterIndex];
+            LCDM7 = LCD_Alpha2[letterIndex];
+            break;
+        case 5:
+            LCDM10 = LCD_Alpha[letterIndex];
+            LCDM11 = LCD_Alpha2[letterIndex];
+            break;
+        default:
+            break;
+        }
     }
     else if (input >= '0' && input <= '9')
     {
-      int numberIndex = input - '0';
-      switch (digit)
-      {
-      case 0:
-        LCDM8 = LCD_Num[numberIndex];
-        LCDM9 = LCD_Num2[numberIndex];
-        break;
-      case 1:
-        LCDM15 = LCD_Num[numberIndex];
-        LCDM16 = LCD_Num2[numberIndex];
-        break;
-      case 2:
-        LCDM19 = LCD_Num[numberIndex];
-        LCDM20 = LCD_Num2[numberIndex];
-        break;
-      case 3:
-        LCDM4 = LCD_Num[numberIndex];
-        LCDM5 = LCD_Num2[numberIndex];
-        break;
-      case 4:
-        LCDM6 = LCD_Num[numberIndex];
-        LCDM7 = LCD_Num2[numberIndex];
-        break;
-      case 5:
-        LCDM10 = LCD_Num[numberIndex];
-        LCDM11 = LCD_Num2[numberIndex];
-        break;
-      default:
-        break;
-      }
+        int numberIndex = input - '0';
+        switch (digit)
+        {
+        case 0:
+            LCDM8 = LCD_Num[numberIndex];
+            LCDM9 = LCD_Num2[numberIndex];
+            break;
+        case 1:
+            LCDM15 = LCD_Num[numberIndex];
+            LCDM16 = LCD_Num2[numberIndex];
+            break;
+        case 2:
+            LCDM19 = LCD_Num[numberIndex];
+            LCDM20 = LCD_Num2[numberIndex];
+            break;
+        case 3:
+            LCDM4 = LCD_Num[numberIndex];
+            LCDM5 = LCD_Num2[numberIndex];
+            break;
+        case 4:
+            LCDM6 = LCD_Num[numberIndex];
+            LCDM7 = LCD_Num2[numberIndex];
+            break;
+        case 5:
+            LCDM10 = LCD_Num[numberIndex];
+            LCDM11 = LCD_Num2[numberIndex];
+            break;
+        default:
+            break;
+        }
     }
-  }
+}
 
-  void display_string(char *string)
-  {
+void display_string(char *string)
+{
     int i, j, charCount = 0;
     int indexShift, remainingChars;
     volatile unsigned long int counter;
@@ -414,44 +411,43 @@ void Initialize_LCD(void)
 
     for (i = 0; string[i] != '\0'; i++)
     {
-      charCount++;
+        charCount++;
     }
 
     if (charCount > 6)
-      for (i = 0; i < charCount; i++)
-      {
-        indexShift = 0;
-        remainingChars = charCount - i;
-
-        if (remainingChars > 6)
+        for (i = 0; i < charCount; i++)
         {
-          // shift all characters to the left one position
-          for (j = i; j < i + 6; j++)
-          {
-            display_char(string[j], 5 - indexShift);
-            indexShift++;
-          }
-        }
-        else
-        {
-          for (j = i; j < charCount; j++)
-          {
-            display_char(string[j], 5 - indexShift);
-            indexShift++;
-          }
-        }
-        // delay counter
-        for (counter = 0; counter < 50000; counter++)
-          ;
-        LCDCMEMCTL = LCDCLRM; // Clears all the segments
+            indexShift = 0;
+            remainingChars = charCount - i;
 
-        // // try to use precise 1 second counter
-        // TA0CTL &= ~TAIFG;
-        // while (TA0CTL & TAIFG == 0);
+            if (remainingChars > 6)
+            {
+                // shift all characters to the left one position
+                for (j = i; j < i + 6; j++)
+                {
+                    display_char(string[j], 5 - indexShift);
+                    indexShift++;
+                }
+            }
+            else
+            {
+                for (j = i; j < charCount; j++)
+                {
+                    display_char(string[j], 5 - indexShift);
+                    indexShift++;
+                }
+            }
+            // delay counter
+            for (counter = 0; counter < 50000; counter++);
+            LCDCMEMCTL = LCDCLRM; // Clears all the segments
 
-        // LCDCMEMCTL = LCDCLRM;    // Clears all the segments
-      }
+            // // try to use precise 1 second counter
+            // TA0CTL &= ~TAIFG;
+            // while (TA0CTL & TAIFG == 0);
+
+            // LCDCMEMCTL = LCDCLRM;    // Clears all the segments
+    }
     else
-      for (i = 0; i < charCount; i++)
-        display_char(string[i], (charCount - 1) - i);
-  }
+        for (i = 0; i < charCount; i++)
+            display_char(string[i], (charCount - 1) - i);
+}
