@@ -61,43 +61,35 @@ count = 0
 incomplete = True
 exit = False
 
-# print(len(whole))
-# print(len(inputString))
+while incomplete:
+    # print(str(count) + ": " + "Sending " + inputString[count] + " to MC")
+    hero = inputString[count]
+    hero = bytes(hero, encoding='ascii')
 
-# print(whole.upper())
+    ser.write(hero)
 
+    for x in range(200):
+        mcReader = ser.read(count + 1).decode('ascii')
+        # If it contains a digit or number
+        if mcReader.isalnum:
 
-# while incomplete:
-#     # print(str(count) + ": " + "Sending " + inputString[count] + " to MC")
-#     hero = inputString[count]
-#     hero = bytes(hero, encoding='ascii')
+            if mcReader in whole:
+                count += 1
+                tracker += mcReader
+                if count == 7:
+                    incomplete = False
+                    exit = True
 
-#     ser.write(hero)
+                break
 
-#     for x in range(200):
-#         mcReader = ser.read(count + 1).decode('ascii')
-#         # If it contains a digit or number
-#         if mcReader.isalnum:
-#             # print("Searching for: " + mcReader)
+    if exit:
+        incomplete = False
+        break
 
-#             if mcReader in whole:
-#                 # print("Within: " + mcReader)
-#                 count += 1
-#                 tracker += mcReader
-#                 if count == 7:
-#                     incomplete = False
-#                     exit = True
-
-#                 break
-
-#     if exit:
-#         incomplete = False
-#         break
-
-# hero = inputString[len(inputString) - 1]
-# hero = bytes(hero, encoding='ascii')
-# for shutup in range(4):
-#     ser.write(hero)
+hero = inputString[len(inputString) - 1]
+hero = bytes(hero, encoding='ascii')
+for shutup in range(4):
+    ser.write(hero)
 
 
 # print("Obtained input:")
