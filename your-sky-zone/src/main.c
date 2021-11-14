@@ -17,6 +17,7 @@
 void config_ACLK_to_32KHz_crystal(void);
 void Initialize_UART(void);
 void uart_write_char(unsigned char ch);
+void handleUARTstring(void);
 unsigned char uart_read_char(void);
 void uart_write_string(char * str);
 char *takeUARTinput(void);
@@ -62,47 +63,7 @@ int main(void)
 
     Initialize_UART();
 
-    char *finalString;
-
-    volatile char i, input;
-    volatile unsigned int j;
-
-    finalString = takeUARTinput();
-
-    // uart_write_string("\nTHIS IS THE FINAL STRING\n");
-    // uart_write_string(finalString);
-    // uart_write_char('\n');
-    // uart_write_char('\r');
-
-    // for (;;)
-    // {
-    //     uart_write_string(finalString);
-    //     uart_write_char('\n');
-    //     uart_write_char('\r');
-    // }
-
-    // // Configure ACLK to the 32 KHz crystal
-    // config_ACLK_to_32KHz_crystal();
-
-    // // Configure Channel 0 for up mode with interrupt
-    // TA0CCR0 = 32768 - 1;        // Fill to get 1 second @ 32 KHz
-    // // TA0CCTL0 |= CCIE;           // Enable Channel 0 CCIE bit
-    // // TA0CCTL0 &= ~CCIFG;         // Clear Channel 0 CCIFG bit
-
-    // // Use ACLK, divide by 1, up mode, TAR cleared, enable interrupt for rollback-to-zero event
-    // TA0CTL = TASSEL_1 | ID_0 | MC_1 | TACLR;
-
-    // // Ensure the flag is cleared at the start
-    // TA0CTL &= ~TAIFG;
-
-    // Enable the global interrupt bit (call an intrinsic function)
-    __enable_interrupt();
-
-    // char string[] = "HELLOMYDUDE";
-
-    while (1)
-        // display_string(string);
-        display_string(finalString);
+    handleUARTstring();
 
     return 0;
 }
@@ -195,51 +156,95 @@ void uart_write_string(char *str)
 //     }
 // }
 
-char *takeUARTinput(void)
+// char *takeUARTinput(void)
+// {
+//     volatile char i, in;
+//     volatile unsigned int j;
+
+//     // char debugString[] = "See here: ";
+//     char *stringFromUART = "";
+//     char chToStr[2];
+
+//     // Initialize chToStr to end with a null terminating character
+//     chToStr[1] = '\0';
+
+//     for (i = '0'; i <= '7';)
+//     {
+//         P1OUT ^= redLED;
+//         // uart_write_string("Begin Iteration ");
+//         uart_write_char(i);
+//         uart_write_string(": ");
+
+//         for (j = 0; j < 50000; j++)
+//         {
+//             in = toupper(uart_read_char());
+
+//             // If the input is a digit between 0 - 9 or A - Z
+//             if ((in >= '0' && in <= '9') || (in >= 'A' && in <= 'Z'))
+//             {
+//                 // P9OUT |= greenLED;
+//                 uart_write_char(in);
+//                 uart_write_string(" ");
+//                 chToStr[0] = in;
+//                 strcat(stringFromUART, chToStr);
+//                 i++;
+//                 break;
+//             }
+//         }
+
+//         uart_write_string(stringFromUART);
+//         uart_write_string("1234567");
+//         // uart_write_string("End Iteration");
+//         // uart_write_string(" ");
+//         uart_write_char('\n');
+//         uart_write_char('\r');
+//     }
+
+//     return stringFromUART;
+// }
+
+void handleUARTstring(void)
 {
-    volatile char i, in;
+    char finalString[16] = "";
+    char *temp;
+
+    volatile char i, input;
     volatile unsigned int j;
 
-    // char debugString[] = "See here: ";
-    char *stringFromUART = "";
-    char chToStr[2];
+    int length = 0;
 
-    // Initialize chToStr to end with a null terminating character
-    chToStr[1] = '\0';
-
-    for (i = '0'; i <= '7';)
+    // writing uart output for debug purposes
+    // constantly pinging the uart RX lines for any data
+    for (;;)
     {
-        P1OUT ^= redLED;
-        // uart_write_string("Begin Iteration ");
-        uart_write_char(i);
-        uart_write_string(": ");
-
-        for (j = 0; j < 50000; j++)
+        for (i = '0'; i <= '9'; i++)
         {
-            in = toupper(uart_read_char());
+            uart_write_char(i);
+            uart_write_char('\n');
+            uart_write_char('\r');
 
-            // If the input is a digit between 0 - 9 or A - Z
-            if ((in >= '0' && in <= '9') || (in >= 'A' && in <= 'Z'))
+            P1OUT ^= redLED;
+
+            for (j = 0; j < 50000; j++)
             {
-                // P9OUT |= greenLED;
-                uart_write_char(in);
-                uart_write_string(" ");
-                chToStr[0] = in;
-                strcat(stringFromUART, chToStr);
-                i++;
-                break;
+                input = uart_read_char();
+
+                // if valid character then add to string
+                if ((input >= 'a' && input <= 'z') || (input >= '0' && input <= '9'))
+                {
+                    temp = malloc(sizeof(char));
+                    sprintf(temp, "%c", toupper(input));
+                    strcat(finalString, temp);
+                    free(temp);
+                }
+                else if (input == '!') // designated termination character
+                {
+                    display_string(finalString);
+                    strcpy(finalString, "");
+                }
             }
         }
-
-        uart_write_string(stringFromUART);
-        uart_write_string("1234567");
-        // uart_write_string("End Iteration");
-        // uart_write_string(" ");
-        uart_write_char('\n');
-        uart_write_char('\r');
     }
-
-    return stringFromUART;
 }
 
 //**********************************************************
