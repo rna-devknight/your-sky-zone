@@ -19,6 +19,7 @@ void Initialize_UART(void);
 void uart_write_char(unsigned char ch);
 unsigned char uart_read_char(void);
 void uart_write_string(char * str);
+char *takeUARTinput(void);
 void Initialize_LCD(void);
 void display_uint16_LCD(unsigned int num);
 void display_digit(int num, int digit);
@@ -53,15 +54,36 @@ int main(void)
     WDTCTL = WDTPW | WDTHOLD;   // Stop WDT
     PM5CTL0 &= ~LOCKLPM5;       // Enable GPIO pins
 
-    P1DIR |= redLED;            // Pins as output
+    // set the pin directions to output
+    P1DIR |= redLED;
     P9DIR |= greenLED;
-    P1OUT |= redLED;            // Red on
-    P9OUT &= ~greenLED;         // Green off
+
+    P1OUT &= ~redLED;
+    P9OUT &= ~greenLED;
 
     // Initializes the LCD_C module
     Initialize_LCD();
 
     Initialize_UART();
+
+    char *finalString;
+
+    volatile char i, input;
+    volatile unsigned int j;
+
+    finalString = takeUARTinput();
+
+    // uart_write_string("\nTHIS IS THE FINAL STRING\n");
+    // uart_write_string(finalString);
+    // uart_write_char('\n');
+    // uart_write_char('\r');
+
+    // for (;;)
+    // {
+    //     uart_write_string(finalString);
+    //     uart_write_char('\n');
+    //     uart_write_char('\r');
+    // }
 
     // // Configure ACLK to the 32 KHz crystal
     // config_ACLK_to_32KHz_crystal();
@@ -80,10 +102,11 @@ int main(void)
     // Enable the global interrupt bit (call an intrinsic function)
     __enable_interrupt();
 
-    char string[] = "HELLOMYDUDE";
+    // char string[] = "HELLOMYDUDE";
 
     while (1)
-        display_string(string);
+        // display_string(string);
+        display_string(finalString);
 
   return 0;
 }
@@ -179,7 +202,7 @@ void uart_write_string(char *str)
 //     }
 // }
 
-char *takeUARTinput()
+char *takeUARTinput(void)
 {
   volatile char i, in;
   volatile unsigned int j;
@@ -226,39 +249,6 @@ char *takeUARTinput()
 
   return stringFromUART;
 }
-
-int main(void)
-{
-  // volatile unsigned int i;
-  char *finalString = "";
-
-  WDTCTL = WDTPW | WDTHOLD; // Stop the Watchdog timer
-  PM5CTL0 &= ~LOCKLPM5;     // Disable GPIO power-on default high-impedance mode
-
-  // set the pin directions to output
-  P1DIR |= redLED;
-  P9DIR |= greenLED;
-
-  P1OUT &= ~redLED;
-  P9OUT &= ~greenLED;
-
-  Initialize_UART();
-  volatile char i, input;
-  volatile unsigned int j;
-
-  finalString = takeUARTinput();
-
-  uart_write_string("\nTHIS IS THE FINAL STRING\n");
-  uart_write_string(finalString);
-  uart_write_char('\n');
-  uart_write_char('\r');
-
-  for (;;)
-  {
-    uart_write_string(finalString);
-    uart_write_char('\n');
-    uart_write_char('\r');
-  }
 
 //**********************************************************
 // Initializes the LCD_C module
